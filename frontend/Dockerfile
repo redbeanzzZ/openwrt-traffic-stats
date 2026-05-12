@@ -7,7 +7,6 @@ RUN npm ci
 
 COPY tsconfig.json tsconfig.node.json vite.config.ts index.html env.d.ts ./
 COPY src ./src
-COPY public ./public
 RUN npm run build
 
 # ---- 运行阶段:nginx 静态服务 + /api 反代到 backend ----
