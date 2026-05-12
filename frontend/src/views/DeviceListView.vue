@@ -4,7 +4,7 @@
       <h3 class="card-title">设备列表 <span class="muted" style="font-weight: normal">(窗口内统计,点击行查看详情)</span></h3>
       <div class="toolbar">
         <label>时间范围:</label>
-        <DateRangePicker v-model="range" />
+        <DateRangePicker v-model="range" @visible-change="rangePickerOpen = $event" />
       </div>
       <div v-if="loading" class="muted" style="text-align: center; padding: 40px">加载中…</div>
       <div v-else-if="error" style="color: #dc2626; padding: 12px">{{ error }}</div>
@@ -71,6 +71,7 @@ const order = ref<Order>('desc');
 const devices = ref<Device[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const rangePickerOpen = ref(false);
 
 function setSort(field: SortBy) {
   if (sortBy.value === field) {
@@ -125,6 +126,7 @@ watch([range, sortBy, order], load);
 let timer: number | undefined;
 onMounted(() => {
   timer = window.setInterval(async () => {
+    if (rangePickerOpen.value) return;
     if (!tickRange()) await load();
   }, 60_000);
 });

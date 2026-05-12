@@ -1,5 +1,6 @@
 import { config } from './config/index.js';
 import { pingDb } from './db/pool.js';
+import { runMigrations } from './db/migrations.js';
 import { startCollector, stopCollector } from './collector/index.js';
 import { createApp } from './api/index.js';
 import { routerSSH } from './router-client/ssh.js';
@@ -9,6 +10,7 @@ async function main(): Promise<void> {
   logger.info({ env: config.server.env, port: config.server.port }, '启动');
 
   await pingDb();
+  await runMigrations();
 
   const app = createApp();
   const server = app.listen(config.server.port, () => {

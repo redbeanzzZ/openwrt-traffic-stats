@@ -32,6 +32,7 @@
         showYMode
         @update:range="range = $event"
         @update:yMode="yMode = $event"
+        @range-visible-change="rangePickerOpen = $event"
       />
       <div v-if="loading" class="muted" style="text-align: center; padding: 40px">加载中…</div>
       <div v-else-if="error" style="color: #dc2626; padding: 12px">{{ error }}</div>
@@ -60,6 +61,7 @@ const traffic = ref<WanTrafficResponse | null>(null);
 const summary = ref<WanSummary | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const rangePickerOpen = ref(false);
 
 async function load() {
   loading.value = true;
@@ -100,6 +102,7 @@ function setupTimer() {
   if (timer) window.clearInterval(timer);
   const ms = granularity.value === 'minute' ? 30_000 : 60_000;
   timer = window.setInterval(async () => {
+    if (rangePickerOpen.value) return;
     // tickRange 改变了 range → watch 会触发 load,否则手动 load 一次
     if (!tickRange()) await load();
   }, ms);

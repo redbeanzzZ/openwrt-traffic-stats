@@ -17,6 +17,7 @@
     <DateRangePicker
       :modelValue="range"
       @update:modelValue="$emit('update:range', $event)"
+      @visible-change="$emit('range-visible-change', $event)"
     />
 
     <label v-if="showYMode" style="margin-left: 24px">单位:</label>
@@ -57,6 +58,7 @@ const emit = defineEmits<{
   'update:modelValue': [Granularity];
   'update:range': [[Date, Date]];
   'update:yMode': ['bytes' | 'bps'];
+  'range-visible-change': [boolean];
 }>();
 
 const options: { value: Granularity; label: string }[] = [
