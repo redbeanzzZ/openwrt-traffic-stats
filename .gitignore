@@ -1,0 +1,28 @@
+# 依赖
+node_modules/
+dist/
+
+# 环境与密钥
+.env
+.env.local
+.env.*.local
+
+# 数据(MySQL 数据卷)
+data/
+
+# 日志
+*.log
+backend/logs/
+
+# IDE / 操作系统
+.DS_Store
+.vscode/
+.idea/
+.ace-tool/
+
+# AI 工具产物 / 个人记录
+PROGRESS.md
+
+# Vite/unplugin 自动生成的类型文件
+frontend/auto-imports.d.ts
+frontend/components.d.ts

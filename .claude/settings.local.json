@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sshpass -V)",
+      "Bash(sshpass *)",
+      "Bash(systemctl list-unit-files *)",
+      "Bash(service --status-all)",
+      "Bash(netstat -tlnp)",
+      "Bash(dpkg -l)",
+      "Bash(chmod +x /redbean/product/traffic-statistics/backend/scripts/init-db.sh)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vue-tsc *)",
+      "Bash(chmod +x /redbean/product/traffic-statistics/start.sh)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(docker-compose --version)",
+      "Bash(docker-compose config *)",
+      "Bash(python3 *)"
+    ]
+  }
+}

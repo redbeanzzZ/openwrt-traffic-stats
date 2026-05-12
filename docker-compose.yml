@@ -1,0 +1,83 @@
+# OpenWrt 流量统计 - 容器编排
+#
+# 启动:  docker compose up -d
+# 停止:  docker compose down
+# 日志:  docker compose logs -f backend
+# 重建:  docker compose up -d --build
+#
+# 三个服务:
+#   mysql    : 数据库(数据持久化到 ./data/mysql)
+#   backend  : Node.js 采集器 + API
+#   frontend : nginx 服务静态文件 + 反向代理 /api 到 backend
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: traffic-stats-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB:-traffic_stats}
+      MYSQL_USER: ${MYSQL_USER:-traffic}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      # 首次启动时自动执行 schema(MySQL 镜像内置机制)
+      - ./backend/scripts/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # 默认不对宿主机暴露 3306,业务无需直连
+    # 调试需要时取消下面注释:
+    # ports:
+    #   - "3306:3306"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: traffic-stats-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # 路由器(必填,用户改 .env)
+      ROUTER_HOST: ${ROUTER_HOST}
+      ROUTER_PORT: ${ROUTER_PORT:-22}
+      ROUTER_USER: ${ROUTER_USER:-root}
+      ROUTER_PASSWORD: ${ROUTER_PASSWORD}
+      # MySQL —— 容器间用服务名 mysql 连
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DB: ${MYSQL_DB:-traffic_stats}
+      MYSQL_USER: ${MYSQL_USER:-traffic}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      # 应用
+      NODE_ENV: production
+      PORT: 3100
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      WATCH_IFACES: ${WATCH_IFACES:-pppoe-wan,br-lan}
+      INTERVAL_IFACE_SEC: ${INTERVAL_IFACE_SEC:-60}
+      INTERVAL_NLBW_SEC: ${INTERVAL_NLBW_SEC:-600}
+      INTERVAL_DHCP_SEC: ${INTERVAL_DHCP_SEC:-3600}
+      TZ: ${TZ:-Asia/Shanghai}
+    # 极少数情况:路由器与 Docker 宿主机不在同一可达子网,可改 host 网络模式
+    # network_mode: host
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: traffic-stats-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
