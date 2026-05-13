@@ -22,7 +22,7 @@
               总计 {{ sortArrow('total') }}
             </th>
             <th class="right" @click="setSort('conns')">
-              连接数 {{ sortArrow('conns') }}
+              连接峰值 {{ sortArrow('conns') }}
             </th>
             <th>最近活跃</th>
           </tr>

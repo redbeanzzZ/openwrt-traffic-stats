@@ -44,7 +44,7 @@
               <th class="right">下行</th>
               <th class="right">上行</th>
               <th class="right">总计</th>
-              <th class="right">连接</th>
+              <th class="right">连接峰值</th>
             </tr>
           </thead>
           <tbody>

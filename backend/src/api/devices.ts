@@ -32,14 +32,24 @@ router.get('/', async (req, res, next) => {
               COALESCE(SUM(d.rx_bytes), 0) AS rx_bytes,
               COALESCE(SUM(d.tx_bytes), 0) AS tx_bytes,
               COALESCE(SUM(d.rx_bytes), 0) + COALESCE(SUM(d.tx_bytes), 0) AS total_bytes,
-              COALESCE(SUM(d.conns), 0) AS conns,
+              COALESCE(c.conns, 0) AS conns,
               MAX(d.ts) AS last_active
          FROM device_traffic d
          LEFT JOIN device_info i ON d.mac = i.mac
+         LEFT JOIN (
+           SELECT mac, MAX(sample_conns) AS conns
+             FROM (
+               SELECT ts, mac, SUM(conns) AS sample_conns
+                 FROM device_traffic_raw
+                WHERE ts >= ? AND ts <= ?
+                GROUP BY ts, mac
+             ) raw_samples
+            GROUP BY mac
+         ) c ON c.mac = d.mac
         WHERE d.ts >= ? AND d.ts <= ?
-        GROUP BY d.mac, i.hostname, i.ip_last, i.vendor
+        GROUP BY d.mac, i.hostname, i.ip_last, i.vendor, c.conns
         ORDER BY ${sortCol} ${order}`,
-      [from, to]
+      [from, to, from, to]
     );
 
     res.json({
@@ -118,20 +128,37 @@ router.get('/:mac/traffic', async (req, res, next) => {
         break;
       case 'minute':
       default:
-        bucketExpr = 'ts';
+        bucketExpr = "DATE_FORMAT(ts, '%Y-%m-%d %H:%i:00')";
         break;
     }
 
     const [rows] = await pool.query<any[]>(
-      `SELECT ${bucketExpr} AS ts,
-              SUM(rx_bytes) AS rx_bytes,
-              SUM(tx_bytes) AS tx_bytes,
-              SUM(conns) AS conns
-         FROM device_traffic
-        WHERE mac = ? AND ts >= ? AND ts <= ?
-        GROUP BY ts
-        ORDER BY ts ASC`,
-      [mac, from, to]
+      `SELECT t.bucket_ts AS ts,
+              t.rx_bytes,
+              t.tx_bytes,
+              COALESCE(c.conns, 0) AS conns
+         FROM (
+           SELECT ${bucketExpr} AS bucket_ts,
+                  SUM(rx_bytes) AS rx_bytes,
+                  SUM(tx_bytes) AS tx_bytes
+             FROM device_traffic
+            WHERE mac = ? AND ts >= ? AND ts <= ?
+            GROUP BY bucket_ts
+         ) t
+         LEFT JOIN (
+           SELECT bucket_ts, MAX(sample_conns) AS conns
+             FROM (
+               SELECT ${bucketExpr} AS bucket_ts,
+                      ts AS sample_ts,
+                      SUM(conns) AS sample_conns
+                 FROM device_traffic_raw
+                WHERE mac = ? AND ts >= ? AND ts <= ?
+                GROUP BY bucket_ts, sample_ts
+             ) raw_samples
+            GROUP BY bucket_ts
+         ) c ON c.bucket_ts = t.bucket_ts
+        ORDER BY t.bucket_ts ASC`,
+      [mac, from, to, mac, from, to]
     );
 
     res.json({
@@ -164,16 +191,34 @@ router.get('/:mac/protocols', async (req, res, next) => {
     const from = (req.query.from as string) || fromDef.toISOString().slice(0, 19).replace('T', ' ');
 
     const [rows] = await pool.query<any[]>(
-      `SELECT layer7,
-              SUM(rx_bytes) AS rx_bytes,
-              SUM(tx_bytes) AS tx_bytes,
-              SUM(rx_bytes) + SUM(tx_bytes) AS total_bytes,
-              SUM(conns) AS conns
-         FROM device_traffic
-        WHERE mac = ? AND ts >= ? AND ts <= ?
-        GROUP BY layer7
-        ORDER BY total_bytes DESC`,
-      [mac, from, to]
+      `SELECT t.layer7,
+              t.rx_bytes,
+              t.tx_bytes,
+              t.total_bytes,
+              COALESCE(c.conns, 0) AS conns
+         FROM (
+           SELECT layer7,
+                  SUM(rx_bytes) AS rx_bytes,
+                  SUM(tx_bytes) AS tx_bytes,
+                  SUM(rx_bytes) + SUM(tx_bytes) AS total_bytes
+             FROM device_traffic
+            WHERE mac = ? AND ts >= ? AND ts <= ?
+            GROUP BY layer7
+         ) t
+         LEFT JOIN (
+           SELECT layer7, MAX(sample_conns) AS conns
+             FROM (
+               SELECT ts,
+                      COALESCE(layer7, '__other__') AS layer7,
+                      SUM(conns) AS sample_conns
+                 FROM device_traffic_raw
+                WHERE mac = ? AND ts >= ? AND ts <= ?
+                GROUP BY ts, COALESCE(layer7, '__other__')
+             ) raw_samples
+            GROUP BY layer7
+         ) c ON c.layer7 = t.layer7
+        ORDER BY t.total_bytes DESC`,
+      [mac, from, to, mac, from, to]
     );
 
     res.json({
