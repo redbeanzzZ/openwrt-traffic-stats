@@ -133,7 +133,8 @@ export async function runNlbwJob(): Promise<void> {
         const last = aggLast.get(key) ?? { rx: 0n, tx: 0n, conns: 0 };
         const rxDelta = cur.rx >= last.rx ? cur.rx - last.rx : cur.rx;
         const txDelta = cur.tx >= last.tx ? cur.tx - last.tx : cur.tx;
-        if (rxDelta === 0n && txDelta === 0n) continue;
+        const connsDelta = cur.conns >= last.conns ? cur.conns - last.conns : cur.conns;
+        if (rxDelta === 0n && txDelta === 0n && connsDelta === 0) continue;
         await conn.execute(
           `INSERT INTO device_traffic (ts, mac, layer7, rx_bytes, tx_bytes, conns)
            VALUES (?, ?, ?, ?, ?, ?)

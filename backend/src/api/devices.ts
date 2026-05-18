@@ -40,7 +40,7 @@ router.get('/', async (req, res, next) => {
            SELECT mac, MAX(sample_conns) AS conns
              FROM (
                SELECT ts, mac, SUM(conns) AS sample_conns
-                 FROM device_traffic_raw
+                 FROM device_traffic
                 WHERE ts >= ? AND ts <= ?
                 GROUP BY ts, mac
              ) raw_samples
@@ -151,7 +151,7 @@ router.get('/:mac/traffic', async (req, res, next) => {
                SELECT ${bucketExpr} AS bucket_ts,
                       ts AS sample_ts,
                       SUM(conns) AS sample_conns
-                 FROM device_traffic_raw
+                 FROM device_traffic
                 WHERE mac = ? AND ts >= ? AND ts <= ?
                 GROUP BY bucket_ts, sample_ts
              ) raw_samples
@@ -211,7 +211,7 @@ router.get('/:mac/protocols', async (req, res, next) => {
                SELECT ts,
                       COALESCE(layer7, '__other__') AS layer7,
                       SUM(conns) AS sample_conns
-                 FROM device_traffic_raw
+                 FROM device_traffic
                 WHERE mac = ? AND ts >= ? AND ts <= ?
                 GROUP BY ts, COALESCE(layer7, '__other__')
              ) raw_samples

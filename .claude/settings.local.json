@@ -17,7 +17,15 @@
       "Bash(docker compose *)",
       "Bash(docker-compose --version)",
       "Bash(docker-compose config *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(mysql -h 127.0.0.1 -P 3306 -u traffic -pchange_me_please traffic_stats -e ' *)",
+      "Bash(curl -s -o /dev/null -w 'total:%{time_total}s connect:%{time_connect}s ttfb:%{time_starttransfer}s\\\\n' 'http://127.0.0.1:50002/api/devices')",
+      "Bash(curl -s -o /dev/null -w 'total:%{time_total}s connect:%{time_connect}s ttfb:%{time_starttransfer}s\\\\n' 'http://127.0.0.1:50002/api/devices?from=2026-05-12%2011:00:00&to=2026-05-12%2018:34:13')",
+      "Bash(docker exec traffic-stats-mysql sh -c 'mysql -uroot -p\"$MYSQL_ROOT_PASSWORD\" \"$MYSQL_DATABASE\" -e \" *)",
+      "Read(//redbean/product/**)",
+      "Bash(curl -s -o /dev/null -w 'HEAD MAX 版本 \\(默认24h\\) total:%{time_total}s ttfb:%{time_starttransfer}s\\\\n' 'http://127.0.0.1:50002/api/devices')",
+      "Bash(git checkout *)",
+      "Bash(docker network *)"
     ]
   }
 }
