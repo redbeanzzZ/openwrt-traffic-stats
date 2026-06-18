@@ -36,13 +36,13 @@ router.get('/traffic', async (req, res, next) => {
     }
 
     const [rows] = await pool.query<any[]>(
-      `SELECT ${bucketExpr} AS ts,
+      `SELECT ${bucketExpr} AS bucket_ts,
               SUM(rx_bytes) AS rx_bytes,
               SUM(tx_bytes) AS tx_bytes
          FROM iface_traffic
         WHERE iface = ? AND ts >= ? AND ts <= ?
-        GROUP BY ts
-        ORDER BY ts ASC`,
+        GROUP BY bucket_ts
+        ORDER BY bucket_ts ASC`,
       [iface, from, to]
     );
 
@@ -51,8 +51,8 @@ router.get('/traffic', async (req, res, next) => {
       granularity,
       from,
       to,
-      points: (rows as { ts: string; rx_bytes: string; tx_bytes: string }[]).map((r) => ({
-        ts: r.ts,
+      points: (rows as { bucket_ts: string; rx_bytes: string; tx_bytes: string }[]).map((r) => ({
+        ts: r.bucket_ts,
         rx_bytes: Number(r.rx_bytes),
         tx_bytes: Number(r.tx_bytes),
       })),

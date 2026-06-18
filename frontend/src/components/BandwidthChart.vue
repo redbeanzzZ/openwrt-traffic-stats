@@ -70,6 +70,20 @@ function formatAxisLabel(v: string): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function formatTooltipTitle(v: string): string {
+  const d = parseTs(v);
+  if (props.granularity === 'day') {
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+  if (props.granularity === 'hour') {
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:00`;
+  }
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+    `${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
+}
+
 function buildOption() {
   const points = normalizePoints();
   const xData = points.map((p) => p.ts);
@@ -84,7 +98,7 @@ function buildOption() {
       formatter: (params: any[]) => {
         const ts = params[0]?.axisValue ?? '';
         const lines = params.map((p) => `${p.marker} ${p.seriesName}: <b>${fmtBytes(p.value)}</b>`);
-        return [`<div style="font-weight:600">${ts}</div>`, ...lines].join('<br/>');
+        return [`<div style="font-weight:600">${formatTooltipTitle(ts)}</div>`, ...lines].join('<br/>');
       },
     },
     legend: { data: ['下行', '上行'], top: props.title ? 28 : 4 },
