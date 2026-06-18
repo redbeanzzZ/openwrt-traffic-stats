@@ -25,37 +25,6 @@ export function fmtBytesShort(n: number): string {
   return `${txt}${units[i]}`;
 }
 
-/** bps,基于"一段时间内的总字节" 除以"这段时间长度",当前最简实现假设 1min 桶 */
-export function bpsFromBytes(bytes: number, secondsPerBucket: number): number {
-  return (bytes * 8) / secondsPerBucket;
-}
-
-export function fmtBps(bps: number): string {
-  if (!Number.isFinite(bps)) return '0 bps';
-  const units = ['bps', 'Kbps', 'Mbps', 'Gbps'];
-  let i = 0;
-  let v = Math.abs(bps);
-  while (v >= 1000 && i < units.length - 1) {
-    v /= 1000;
-    i += 1;
-  }
-  return `${v.toFixed(2)} ${units[i]}`;
-}
-
-/** 紧凑版 bps:"1.5G" / "200M" / "49K"(无单位词,因为 Y 轴位置紧) */
-export function fmtBpsShort(bps: number): string {
-  if (!Number.isFinite(bps) || bps === 0) return '0';
-  const units = ['', 'K', 'M', 'G', 'T'];
-  let i = 0;
-  let v = Math.abs(bps);
-  while (v >= 1000 && i < units.length - 1) {
-    v /= 1000;
-    i += 1;
-  }
-  const txt = v < 10 ? v.toFixed(1) : Math.round(v).toString();
-  return `${txt}${units[i]}`;
-}
-
 /** 把后端返回的 "YYYY-MM-DD HH:mm:ss" 转成 Date */
 export function parseTs(s: string): Date {
   // MySQL DATETIME 没有时区,按本地处理

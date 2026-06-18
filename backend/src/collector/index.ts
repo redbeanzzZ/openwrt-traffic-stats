@@ -2,6 +2,7 @@ import { config } from '../config/index.js';
 import { runIfaceJob } from './iface-job.js';
 import { runNlbwJob } from './nlbw-job.js';
 import { runDhcpJob } from './dhcp-job.js';
+import { runRetentionJob } from './retention-job.js';
 import { pool } from '../db/pool.js';
 import { child } from '../utils/logger.js';
 
@@ -43,12 +44,15 @@ export function startCollector(): void {
       iface: config.intervals.iface,
       nlbw: config.intervals.nlbw,
       dhcp: config.intervals.dhcp,
+      retention: config.intervals.retention,
+      retentionDays: config.retention.days,
     },
     '采集器启动'
   );
   loop('iface', config.intervals.iface, runIfaceJob);
   loop('nlbw', config.intervals.nlbw, runNlbwJob);
   loop('dhcp', config.intervals.dhcp, runDhcpJob);
+  loop('retention', config.intervals.retention, runRetentionJob);
 }
 
 export function stopCollector(): void {

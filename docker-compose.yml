@@ -65,6 +65,8 @@ services:
       INTERVAL_IFACE_SEC: ${INTERVAL_IFACE_SEC:-60}
       INTERVAL_NLBW_SEC: ${INTERVAL_NLBW_SEC:-600}
       INTERVAL_DHCP_SEC: ${INTERVAL_DHCP_SEC:-3600}
+      INTERVAL_RETENTION_SEC: ${INTERVAL_RETENTION_SEC:-86400}
+      RETENTION_DAYS: ${RETENTION_DAYS:-365}
       TZ: ${TZ:-Asia/Shanghai}
     # 极少数情况:路由器与 Docker 宿主机不在同一可达子网,可改 host 网络模式
     # network_mode: host

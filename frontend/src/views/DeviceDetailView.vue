@@ -19,16 +19,13 @@
       <GranularitySelector
         v-model="granularity"
         :range="range"
-        :yMode="yMode"
-        showYMode
         @update:range="range = $event"
-        @update:yMode="yMode = $event"
       />
       <div v-if="loadingTraffic" class="muted" style="text-align: center; padding: 40px">加载中…</div>
       <div v-else-if="!traffic?.points.length" class="muted" style="text-align: center; padding: 40px">
         该设备在选定窗口内没有流量
       </div>
-      <BandwidthChart v-else :points="traffic.points" :granularity="granularity" :yMode="yMode" />
+      <BandwidthChart v-else :points="traffic.points" :granularity="granularity" :range="range" />
     </div>
 
     <div class="card">
@@ -79,7 +76,6 @@ const protocols = ref<ProtocolStat[]>([]);
 const granularity = ref<Granularity>('hour');
 // 默认最近 24 小时
 const range = ref<[Date, Date]>([new Date(Date.now() - 24 * 3600 * 1000), new Date()]);
-const yMode = ref<'bytes' | 'bps'>('bytes');
 const loadingTraffic = ref(false);
 const loadingProto = ref(false);
 

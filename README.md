@@ -98,6 +98,10 @@ open http://localhost:8080
 | `MYSQL_PASSWORD` | `change_me_too` | **必改**,业务账号密码 |
 | `WEB_PORT` | `8080` | 浏览器访问端口 |
 | `WATCH_IFACES` | `pppoe-wan,br-lan` | 关注的网口名(`ip link show` 看) |
+| `RETENTION_DAYS` | `365` | 只保留最近多少天的差分统计和采集日志 |
+| `INTERVAL_RETENTION_SEC` | `86400` | 数据保留清理任务的执行间隔 |
+
+默认不保存 nlbwmon 原始快照,只保存差分后的展示数据和一份很小的当前累计基线。按 60 秒采样、约 27 台设备的当前规模估算,保留 365 天大约需要 3 ~ 4 GB 业务库空间。
 
 ---
 

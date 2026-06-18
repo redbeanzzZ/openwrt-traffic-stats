@@ -28,10 +28,7 @@
       <GranularitySelector
         v-model="granularity"
         :range="range"
-        :yMode="yMode"
-        showYMode
         @update:range="range = $event"
-        @update:yMode="yMode = $event"
         @range-visible-change="rangePickerOpen = $event"
       />
       <div v-if="loading" class="muted" style="text-align: center; padding: 40px">加载中…</div>
@@ -39,7 +36,7 @@
       <div v-else-if="!traffic?.points.length" class="muted" style="text-align: center; padding: 40px">
         当前窗口暂无数据(采集器是否在跑?或换个粒度试试)
       </div>
-      <BandwidthChart v-else :points="traffic.points" :granularity="granularity" :yMode="yMode" />
+      <BandwidthChart v-else :points="traffic.points" :granularity="granularity" :range="range" />
     </div>
   </div>
 </template>
@@ -56,7 +53,6 @@ const iface = 'pppoe-wan';
 const granularity = ref<Granularity>('minute');
 // 默认最近 1 小时
 const range = ref<[Date, Date]>([new Date(Date.now() - 3600 * 1000), new Date()]);
-const yMode = ref<'bytes' | 'bps'>('bps');
 const traffic = ref<WanTrafficResponse | null>(null);
 const summary = ref<WanSummary | null>(null);
 const loading = ref(false);

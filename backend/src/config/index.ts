@@ -41,6 +41,10 @@ export const config = {
     iface: num('INTERVAL_IFACE_SEC', 60),
     nlbw: num('INTERVAL_NLBW_SEC', 60),
     dhcp: num('INTERVAL_DHCP_SEC', 3600),
+    retention: num('INTERVAL_RETENTION_SEC', 86400),
+  },
+  retention: {
+    days: num('RETENTION_DAYS', 365),
   },
   watchIfaces: (process.env.WATCH_IFACES ?? 'pppoe-wan,br-lan')
     .split(',')

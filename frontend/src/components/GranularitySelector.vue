@@ -19,26 +19,6 @@
       @update:modelValue="$emit('update:range', $event)"
       @visible-change="$emit('range-visible-change', $event)"
     />
-
-    <label v-if="showYMode" style="margin-left: 24px">单位:</label>
-    <button
-      v-if="showYMode"
-      class="btn"
-      :class="{ active: yMode === 'bytes' }"
-      title="显示该时间桶内累计的字节总量"
-      @click="$emit('update:yMode', 'bytes')"
-    >
-      字节
-    </button>
-    <button
-      v-if="showYMode"
-      class="btn"
-      :class="{ active: yMode === 'bps' }"
-      title="显示该时间桶内的平均速率(总字节 × 8 ÷ 桶秒数),不是瞬时峰值"
-      @click="$emit('update:yMode', 'bps')"
-    >
-      bps
-    </button>
   </div>
 </template>
 
@@ -50,14 +30,11 @@ import type { Granularity } from '../types';
 const props = defineProps<{
   modelValue: Granularity;
   range: [Date, Date] | null;
-  yMode?: 'bytes' | 'bps';
-  showYMode?: boolean;
 }>();
 
 const emit = defineEmits<{
   'update:modelValue': [Granularity];
   'update:range': [[Date, Date]];
-  'update:yMode': ['bytes' | 'bps'];
   'range-visible-change': [boolean];
 }>();
 
